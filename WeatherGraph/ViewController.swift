@@ -13,8 +13,7 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
-    let weatherGraphView = WeatherGraphView()
-    weatherGraphView.frame = CGRectMake(0, 0, self.view.bounds.size.width, 260)
+    let weatherGraphView = WeatherGraphView(frame:self.view.bounds)
     weatherGraphView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
     self.view.addSubview(weatherGraphView)
   }
