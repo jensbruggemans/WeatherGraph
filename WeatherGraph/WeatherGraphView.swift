@@ -15,56 +15,72 @@ class WeatherGraphView: UIView {
     
     let padding:CGFloat = 40
     let gridLineColor = UIColor(red: 0.584, green: 0.651, blue: 0.898, alpha: 1.000)
+    let textColor = UIColor(red: 0.584, green: 0.651, blue: 0.898, alpha: 1.000)
     
     let maxTemp:Int = 30
     let numberOfDays = 7
     
     let dayStrings = ["Mon", "Tue", "Wed","Thu","Fri","Sat","Sun"]
     let temperatures:[CGFloat] = [13,12,23,23.5,16,16.5,29,28,18.5,17.5,24.5,22.5,16,15,21.5,20.5,14,13,22.5,22,14.5,14,25,24.5,17,16.5,26.5,25,16]
-    let maxTemperatures:[CGFloat] = [13.5,12.5,24,24,17,17,30,29,20,18,25,23,17,16,22,23,16,15,24.5,24,16.5,16,27,26.5,19,18.5,28.5,27,18]
-    let minTemperatures:[CGFloat] = [12.5,11.5,22.5,23,15.5,16,28,27,17.5,16.5,23,21,14.5,13.5,20,19,13,11,21,20,13,13,24,23,14.5,14,24,23,13.5]
+    let maxTemperatures:[CGFloat] = [13.5,12.5,24,24,17,17,31,29.5,20,19,26,24,17.5,16.5,23,22,16,15,26.5,25,16.5,16,28,27,19,18.5,30,28,18]
+    let minTemperatures:[CGFloat] = [12.5,11.5,22.5,23,15.5,16,28,27,17.5,16.5,23,21,14.5,13.5,20,19,13,12,21,20,13,13,24,23,14.5,14,24,23,13.5]
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.clearColor()
-        self.createDayLabels()
-        self.createTemperatureLabels()
+        self.createLabels()
     }
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.backgroundColor = UIColor.clearColor()
+        self.createLabels()
+    }
+    
+    func createLabels() {
         self.createDayLabels()
         self.createTemperatureLabels()
     }
     
     func createDayLabels() {
-        let availableWidth = CGRectGetWidth(self.bounds) - 2 * padding
-        let availableHeight = CGRectGetHeight(self.bounds) - 2 * padding
+        // Calculate available space
+        let availableWidth = self.availableWidth()
+        let availableHeight = self.availableHeight()
+        
+        // Calculate the size of the labels
         let labelWidth = availableWidth / CGFloat(self.numberOfDays)
+        let labelHeight = padding
         
         for var i = 0; i < self.numberOfDays; i++ {
+            // Create, position and add to view
             let label = UILabel()
-            label.frame = CGRect(x: padding + CGFloat(i) * labelWidth, y: padding + availableHeight, width: labelWidth, height: padding)
+            label.frame = CGRect(x: padding + CGFloat(i) * labelWidth, y: padding + availableHeight, width: labelWidth, height: labelHeight)
             self.addSubview(label)
+            
+            // Set look of label and text
             label.textAlignment = NSTextAlignment.Center
             label.text = self.dayStrings[i]
-            label.textColor = self.gridLineColor
+            label.textColor = self.textColor
         }
     }
     
     func createTemperatureLabels() {
-        let availableWidth = CGRectGetWidth(self.bounds) - 2 * padding
-        let availableHeight = CGRectGetHeight(self.bounds) - 2 * padding
+        // Calculate available space
+        let availableWidth = self.availableWidth()
+        let availableHeight = self.availableHeight()
+        
+        // Calculate the size of the labels
         let labelWidth = padding
         let labelHeight : CGFloat = 24
+        
         for var i = 0; i <= self.maxTemp; i += 10 {
+            // Create, position and add to view
             let label = UILabel()
             label.frame = CGRect(x: 0.0, y: padding + availableHeight - labelHeight / 2 - (availableHeight / CGFloat(maxTemp)) * CGFloat(i), width: labelWidth, height: labelHeight)
             self.addSubview(label)
+            
+            // Set look of label and text
             label.textAlignment = NSTextAlignment.Center
             label.text = "\(i)"
-            label.textColor = self.gridLineColor
+            label.textColor = self.textColor
         }
     }
     
@@ -73,7 +89,7 @@ class WeatherGraphView: UIView {
     override func drawRect(rect: CGRect) {
         self.drawBackgroundGradient()
         self.drawGrid()
-        self.drawEstimatesLine()
+        self.drawTemperatureArea()
         self.drawTemperatureLine()
         self.drawAxis()
     }
@@ -174,16 +190,18 @@ class WeatherGraphView: UIView {
     }
     
     func drawTemperatureLine() {
+        // Calculate available space
         let availableHeight = self.availableHeight()
         let availableWidth = self.availableWidth()
 
-        
+        // Create the path and move it to the first point
         let bezierPath = UIBezierPath()
-        bezierPath.moveToPoint(CGPointMake(padding, padding + availableHeight - temperatures[0] * availableHeight / 30))
+        bezierPath.moveToPoint(CGPointMake(padding, padding + availableHeight - temperatures[0] * availableHeight / CGFloat(self.maxTemp)))
         
+        // Add a line segment for each temperature
         for var i = 1; i < temperatures.count; i++ {
             let x = padding + CGFloat(i) * availableWidth / CGFloat(temperatures.count - 1)
-            let y = padding + availableHeight - temperatures[i] * availableHeight / 30
+            let y = padding + availableHeight - temperatures[i] * availableHeight / CGFloat(self.maxTemp)
             bezierPath.addLineToPoint(CGPointMake(x,y))
         }
         
@@ -193,7 +211,7 @@ class WeatherGraphView: UIView {
         bezierPath.stroke()
     }
     
-    func drawEstimatesLine() {
+    func drawTemperatureArea() {
         let availableHeight = self.availableHeight()
         let availableWidth = self.availableWidth()
         
